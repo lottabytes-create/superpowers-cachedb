@@ -336,3 +336,35 @@ def test_non_positive_interval_rejected(tmp_path):
             auto_save=False,
             auto_save_interval=0,
         )
+
+
+def test_data_survives_restart(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    db.set("a", "1")
+    db.set("中文", "厦门")
+    db.save()
+    restarted = CacheDB(file_path=path, auto_save=False)
+    assert restarted.get("a") == "1"
+    assert restarted.get("中文") == "厦门"
+    assert restarted.keys() == ["a", "中文"]
+
+
+def test_default_file_path_in_cwd(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    db = CacheDB(auto_save=False)
+    db.set("a", "1")
+    db.save()
+    assert (tmp_path / "cachedb_data.json").exists()
+
+
+def test_concurrent_writes_during_auto_save(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=True, auto_save_interval=0.01)
+    expected = {f"k{i}": str(i) for i in range(300)}
+    try:
+        for key, value in expected.items():
+            db.set(key, value)
+        assert _wait_until(lambda: _read_json(path) == expected, timeout=3.0)
+    finally:
+        db.stop_auto_save()
