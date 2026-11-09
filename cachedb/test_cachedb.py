@@ -315,12 +315,15 @@ def test_auto_save_disabled_does_not_write(tmp_path):
 def test_stop_auto_save_stops_further_writes(tmp_path):
     path = tmp_path / "cachedb_data.json"
     db = CacheDB(file_path=path, auto_save=True, auto_save_interval=0.05)
-    db.set("a", "1")
-    assert _wait_until(lambda: _read_json(path) == {"a": "1"})
-    assert db.stop_auto_save() is True
-    db.set("b", "2")
-    time.sleep(0.2)
-    assert _read_json(path) == {"a": "1"}
+    try:
+        db.set("a", "1")
+        assert _wait_until(lambda: _read_json(path) == {"a": "1"})
+        assert db.stop_auto_save() is True
+        db.set("b", "2")
+        time.sleep(0.2)
+        assert _read_json(path) == {"a": "1"}
+    finally:
+        db.stop_auto_save()
 
 
 def test_stop_auto_save_returns_false_when_not_running(tmp_path):
@@ -366,5 +369,17 @@ def test_concurrent_writes_during_auto_save(tmp_path):
         for key, value in expected.items():
             db.set(key, value)
         assert _wait_until(lambda: _read_json(path) == expected, timeout=3.0)
+    finally:
+        db.stop_auto_save()
+
+
+def test_auto_save_continues_after_oserror(tmp_path):
+    path = tmp_path / "missing" / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=True, auto_save_interval=0.01)
+    try:
+        db.set("k", "v")
+        time.sleep(0.1)
+        path.parent.mkdir()
+        assert _wait_until(lambda: _read_json(path) == {"k": "v"})
     finally:
         db.stop_auto_save()
