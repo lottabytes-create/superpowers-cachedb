@@ -198,3 +198,60 @@ def test_save_raises_oserror_for_missing_directory(tmp_path):
     db = CacheDB(file_path=path, auto_save=False)
     with pytest.raises(OSError):
         db.save()
+
+
+def test_load_missing_file_returns_false(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    assert db.load() is False
+
+
+def test_load_restores_data(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    path.write_text('{"name": "alice", "empty": ""}', encoding="utf-8")
+    db = CacheDB(file_path=path, auto_save=False)
+    assert db.load() is True
+    assert db.get("name") == "alice"
+    assert db.get("empty") == ""
+
+
+def test_load_replaces_existing_data(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    db.set("old", "1")
+    path.write_text('{"new": "2"}', encoding="utf-8")
+    assert db.load() is True
+    assert db.keys() == ["new"]
+
+
+def test_load_empty_object_clears_data(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    db.set("old", "1")
+    path.write_text("{}", encoding="utf-8")
+    assert db.load() is True
+    assert db.keys() == []
+
+
+def test_load_invalid_json_raises_value_error(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    path.write_text("{not json", encoding="utf-8")
+    db = CacheDB(file_path=path, auto_save=False)
+    with pytest.raises(ValueError):
+        db.load()
+
+
+def test_load_non_object_raises_value_error(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    path.write_text('["a", "b"]', encoding="utf-8")
+    db = CacheDB(file_path=path, auto_save=False)
+    with pytest.raises(ValueError):
+        db.load()
+
+
+def test_load_non_string_value_raises_value_error(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    path.write_text('{"k": 1}', encoding="utf-8")
+    db = CacheDB(file_path=path, auto_save=False)
+    with pytest.raises(ValueError):
+        db.load()

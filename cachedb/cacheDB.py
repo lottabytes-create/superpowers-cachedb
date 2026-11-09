@@ -62,3 +62,20 @@ class CacheDB:
         content = json.dumps(snapshot, ensure_ascii=False, indent=2)
         self._file_path.write_text(content, encoding="utf-8")
         return True
+
+    def load(self) -> bool:
+        if not self._file_path.exists():
+            return False
+        with open(self._file_path, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"invalid JSON in {self._file_path}") from exc
+        if not isinstance(data, dict):
+            raise ValueError("top-level JSON value must be an object")
+        for value in data.values():
+            if not isinstance(value, str):
+                raise ValueError("all values must be strings")
+        with self._lock:
+            self._data = dict(data)
+        return True
