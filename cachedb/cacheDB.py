@@ -1,35 +1,64 @@
+import json
+import threading
+from pathlib import Path
+
+
 class CacheDB:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        file_path: str | Path = "cachedb_data.json",
+        auto_save: bool = True,
+        auto_save_interval: float = 5.0,
+    ) -> None:
+        if auto_save_interval <= 0:
+            raise ValueError("auto_save_interval must be positive")
+        self._file_path = Path(file_path)
+        self._auto_save_enabled = auto_save
+        self._auto_save_interval = auto_save_interval
         self._data: dict[str, str] = {}
+        self._lock = threading.RLock()
 
     def _require_str(self, value: object, name: str) -> None:
         if not isinstance(value, str):
             raise TypeError(f"{name} must be str, got {type(value).__name__}")
 
     def set(self, key: str, value: str) -> bool:
-        self._require_str(key, "key")
-        self._require_str(value, "value")
-        self._data[key] = value
-        return True
+        with self._lock:
+            self._require_str(key, "key")
+            self._require_str(value, "value")
+            self._data[key] = value
+            return True
 
     def get(self, key: str) -> str | None:
-        self._require_str(key, "key")
-        return self._data.get(key)
+        with self._lock:
+            self._require_str(key, "key")
+            return self._data.get(key)
 
     def delete(self, key: str) -> bool:
-        self._require_str(key, "key")
-        if key in self._data:
-            del self._data[key]
-            return True
-        return False
+        with self._lock:
+            self._require_str(key, "key")
+            if key in self._data:
+                del self._data[key]
+                return True
+            return False
 
     def exists(self, key: str) -> bool:
-        self._require_str(key, "key")
-        return key in self._data
+        with self._lock:
+            self._require_str(key, "key")
+            return key in self._data
 
     def keys(self) -> list[str]:
-        return list(self._data.keys())
+        with self._lock:
+            return list(self._data.keys())
 
     def clear(self) -> bool:
-        self._data.clear()
+        with self._lock:
+            self._data.clear()
+            return True
+
+    def save(self) -> bool:
+        with self._lock:
+            snapshot = dict(self._data)
+        content = json.dumps(snapshot, ensure_ascii=False, indent=2)
+        self._file_path.write_text(content, encoding="utf-8")
         return True

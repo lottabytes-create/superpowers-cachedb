@@ -1,16 +1,18 @@
+import json
+
 import pytest
 
 from cacheDB import CacheDB
 
 
-def test_new_cache_instance():
-    db = CacheDB()
+def test_new_cache_instance(tmp_path):
+    db = CacheDB(file_path=tmp_path / "cachedb_data.json", auto_save=False)
     assert isinstance(db, CacheDB)
 
 
 @pytest.fixture
-def db():
-    return CacheDB()
+def db(tmp_path):
+    return CacheDB(file_path=tmp_path / "cachedb_data.json", auto_save=False)
 
 
 def test_set_returns_true(db):
@@ -154,3 +156,45 @@ def test_cache_usable_after_clear(db):
     db.clear()
     db.set("b", "2")
     assert db.get("b") == "2"
+
+
+def test_save_creates_file(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    db.set("name", "alice")
+    assert db.save() is True
+    assert path.exists()
+
+
+def test_save_writes_json_content(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    db.set("name", "alice")
+    db.set("empty", "")
+    db.save()
+    assert json.loads(path.read_text(encoding="utf-8")) == {
+        "name": "alice",
+        "empty": "",
+    }
+
+
+def test_save_empty_cache_writes_empty_object(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    db.save()
+    assert json.loads(path.read_text(encoding="utf-8")) == {}
+
+
+def test_save_preserves_unicode(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    db.set("城市", "厦门")
+    db.save()
+    assert json.loads(path.read_text(encoding="utf-8")) == {"城市": "厦门"}
+
+
+def test_save_raises_oserror_for_missing_directory(tmp_path):
+    path = tmp_path / "missing" / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    with pytest.raises(OSError):
+        db.save()
