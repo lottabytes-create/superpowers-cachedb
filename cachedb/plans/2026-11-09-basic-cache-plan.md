@@ -1,6 +1,6 @@
 # CacheDB 基础缓存数据库实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 用 TDD 实现一个纯内存、仅支持字符串的 Python 缓存数据库 `CacheDB`，支持六个基本操作并通过 pytest 全量测试。
 
@@ -41,7 +41,7 @@
 **Interfaces:**
 - Produces: `class CacheDB`，构造签名 `CacheDB() -> None`，内部状态 `_data: dict[str, str]`。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 ```python
 from cacheDB import CacheDB
@@ -52,21 +52,21 @@ def test_new_cache_instance():
     assert isinstance(db, CacheDB)
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v`
 Expected: FAIL，`ModuleNotFoundError: No module named 'cacheDB'`
 
-- [ ] **Step 3: 实现类框架**
+- [x] **Step 3: 实现类框架**
 
 在 `cachedb/cacheDB.py` 中创建 `CacheDB` 类，`__init__` 初始化空字典 `self._data: dict[str, str] = {}`，不添加任何方法。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v`
 Expected: PASS，1 passed
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -85,7 +85,7 @@ git commit -m "feat: 创建 CacheDB 基础类框架"
 - Consumes: Task 1 的 `CacheDB`
 - Produces: `set(self, key: str, value: str) -> bool`；私有校验方法 `_require_str(value: object, name: str) -> None`（非 `str` 抛 `TypeError`）
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 ```python
 import pytest
@@ -115,21 +115,21 @@ def test_set_rejects_non_string(db, key, value):
         db.set(key, value)
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "set"`
 Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'set'`
 
-- [ ] **Step 3: 实现 set()**
+- [x] **Step 3: 实现 set()**
 
 新增 `_require_str` 做类型校验，`set` 校验 key 与 value 后执行 `self._data[key] = value` 并返回 `True`。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "set"`
 Expected: PASS，6 passed
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -148,7 +148,7 @@ git commit -m "feat: 实现 CacheDB.set()"
 - Consumes: `set(key, value)`、`_require_str`
 - Produces: `get(self, key: str) -> str | None`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 ```python
 def test_get_existing_value(db):
@@ -176,21 +176,21 @@ def test_get_rejects_non_string_key(db):
         db.get(1)
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "get"`
 Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'get'`
 
-- [ ] **Step 3: 实现 get()**
+- [x] **Step 3: 实现 get()**
 
 校验 key 后返回 `self._data.get(key)`。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "get"`
 Expected: PASS，5 passed
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -209,7 +209,7 @@ git commit -m "feat: 实现 CacheDB.get()"
 - Consumes: `set`、`get`、`_require_str`
 - Produces: `delete(self, key: str) -> bool`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 ```python
 def test_delete_existing_returns_true(db):
@@ -232,21 +232,21 @@ def test_delete_rejects_non_string_key(db):
         db.delete(1)
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "delete"`
 Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'delete'`
 
-- [ ] **Step 3: 实现 delete()**
+- [x] **Step 3: 实现 delete()**
 
 校验 key；存在则删除并返回 `True`，不存在返回 `False`。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "delete"`
 Expected: PASS，4 passed
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -265,7 +265,7 @@ git commit -m "feat: 实现 CacheDB.delete()"
 - Consumes: `set`、`delete`、`_require_str`
 - Produces: `exists(self, key: str) -> bool`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 ```python
 def test_exists_true_after_set(db):
@@ -294,21 +294,21 @@ def test_exists_rejects_non_string_key(db):
         db.exists(1)
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "exists"`
 Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'exists'`
 
-- [ ] **Step 3: 实现 exists()**
+- [x] **Step 3: 实现 exists()**
 
 校验 key 后返回 `key in self._data`。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "exists"`
 Expected: PASS，5 passed
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -327,7 +327,7 @@ git commit -m "feat: 实现 CacheDB.exists()"
 - Consumes: `set`、`delete`
 - Produces: `keys(self) -> list[str]`，按插入顺序返回新列表
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 ```python
 def test_keys_empty_on_new_cache(db):
@@ -362,21 +362,21 @@ def test_keys_order_unchanged_after_overwrite(db):
     assert db.keys() == ["a", "b"]
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "keys"`
 Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'keys'`
 
-- [ ] **Step 3: 实现 keys()**
+- [x] **Step 3: 实现 keys()**
 
 返回 `list(self._data.keys())`。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "keys"`
 Expected: PASS，5 passed
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -395,7 +395,7 @@ git commit -m "feat: 实现 CacheDB.keys()"
 - Consumes: `set`、`get`、`keys`
 - Produces: `clear(self) -> bool`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 ```python
 def test_clear_returns_true(db):
@@ -421,21 +421,21 @@ def test_cache_usable_after_clear(db):
     assert db.get("b") == "2"
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "clear"`
 Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'clear'`
 
-- [ ] **Step 3: 实现 clear()**
+- [x] **Step 3: 实现 clear()**
 
 调用 `self._data.clear()` 后返回 `True`。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v -k "clear"`
 Expected: PASS，4 passed
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -446,7 +446,7 @@ git commit -m "feat: 实现 CacheDB.clear()"
 
 ## 全量验证
 
-- [ ] 运行 `python -m pytest cachedb/test_cachedb.py -v`
+- [x] 运行 `python -m pytest cachedb/test_cachedb.py -v`
   Expected: 全部通过，0 failed
-- [ ] 运行 `git status`，确认工作区干净
-- [ ] 运行 `git log --oneline`，确认 7 个任务共 7 次功能提交
+- [x] 运行 `git status`，确认工作区干净
+- [x] 运行 `git log --oneline`，确认 7 个任务共 7 次功能提交
