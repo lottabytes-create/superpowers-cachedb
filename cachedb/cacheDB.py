@@ -15,3 +15,10 @@ class CacheDB:
     def get(self, key: str) -> str | None:
         self._require_str(key, "key")
         return self._data.get(key)
+
+    def delete(self, key: str) -> bool:
+        self._require_str(key, "key")
+        if key in self._data:
+            del self._data[key]
+            return True
+        return False

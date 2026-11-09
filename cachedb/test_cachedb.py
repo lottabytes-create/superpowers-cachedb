@@ -53,3 +53,23 @@ def test_get_after_overwrite_returns_latest(db):
 def test_get_rejects_non_string_key(db):
     with pytest.raises(TypeError):
         db.get(1)
+
+
+def test_delete_existing_returns_true(db):
+    db.set("k", "v")
+    assert db.delete("k") is True
+
+
+def test_delete_missing_returns_false(db):
+    assert db.delete("missing") is False
+
+
+def test_delete_removes_value(db):
+    db.set("k", "v")
+    db.delete("k")
+    assert db.get("k") is None
+
+
+def test_delete_rejects_non_string_key(db):
+    with pytest.raises(TypeError):
+        db.delete(1)
