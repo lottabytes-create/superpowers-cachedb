@@ -45,7 +45,7 @@
   - `save(self) -> bool`
   - 私有 `_lock: threading.RLock`，六个原方法在同一把锁下执行。
 
-- [ ] **Step 1: 修改测试文件顶部与 fixture**
+- [x] **Step 1: 修改测试文件顶部与 fixture**
 
 在 `test_cachedb.py` 顶部加入 `import json` 与 `from pathlib import Path`（若未使用可省略），并将实例测试与 fixture 改为：
 
@@ -62,7 +62,7 @@ def db(tmp_path):
 
 Task 1 其余测试的断言一律不改。
 
-- [ ] **Step 2: 追加 save() 的失败测试**
+- [x] **Step 2: 追加 save() 的失败测试**
 
 ```python
 def test_save_creates_file(tmp_path):
@@ -107,13 +107,13 @@ def test_save_raises_oserror_for_missing_directory(tmp_path):
         db.save()
 ```
 
-- [ ] **Step 3: 运行测试确认失败**
+- [x] **Step 3: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -k "save" -v`
 
 Expected: FAIL，`TypeError`（构造参数不存在）或 `AttributeError: 'CacheDB' object has no attribute 'save'`。
 
-- [ ] **Step 4: 实现构造参数与 save()**
+- [x] **Step 4: 实现构造参数与 save()**
 
 在 `cacheDB.py` 顶部加入 `import json`、`import threading`、`from pathlib import Path`。
 
@@ -141,13 +141,13 @@ def __init__(
 
 把 `set/get/delete/exists/keys/clear` 的方法体放进 `with self._lock:`；返回值与异常行为保持不变。
 
-- [ ] **Step 5: 运行测试确认通过**
+- [x] **Step 5: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v`
 
 Expected: 35 passed（原 30 + 新增 5）。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -166,7 +166,7 @@ git commit -m "feat: 支持持久化构造参数并实现 CacheDB.save()"
 - Consumes: `self._file_path: Path`、`self._data`、`self._lock`。
 - Produces: `load(self) -> bool`。
 
-- [ ] **Step 1: 追加 load() 的失败测试**
+- [x] **Step 1: 追加 load() 的失败测试**
 
 ```python
 def test_load_missing_file_returns_false(tmp_path):
@@ -226,13 +226,13 @@ def test_load_non_string_value_raises_value_error(tmp_path):
         db.load()
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -k "load" -v`
 
 Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'load'`。
 
-- [ ] **Step 3: 实现 load()**
+- [x] **Step 3: 实现 load()**
 
 文件不存在返回 `False` 且不改内存；其余步骤：
 
@@ -241,13 +241,13 @@ Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'load'`。
 3. 任一 value 不是 `str` → `ValueError`。
 4. 在 `with self._lock:` 内用 `dict(data)` 替换 `self._data`，返回 `True`。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v`
 
 Expected: 42 passed。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -266,7 +266,7 @@ git commit -m "feat: 实现 CacheDB.load()"
 - Consumes: `load() -> bool`。
 - Produces: `__init__` 在完成字段初始化后调用 `self.load()`，文件不存在时保持空库。
 
-- [ ] **Step 1: 追加启动加载测试**
+- [x] **Step 1: 追加启动加载测试**
 
 ```python
 def test_init_auto_loads_existing_file(tmp_path):
@@ -289,23 +289,23 @@ def test_init_with_corrupt_file_raises_value_error(tmp_path):
         CacheDB(file_path=path, auto_save=False)
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -k "init" -v`
 
 Expected: 前两个 FAIL（数据未恢复 / 无差别则可能通过），损坏文件用例 FAIL（未抛异常）。
 
-- [ ] **Step 3: 在 __init__ 中调用 load()**
+- [x] **Step 3: 在 __init__ 中调用 load()**
 
 字段初始化完成后、启动定时线程之前调用 `self.load()`。本任务不启动线程。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v`
 
 Expected: 45 passed。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -326,7 +326,7 @@ git commit -m "feat: 启动时自动加载缓存数据"
   - `stop_auto_save(self) -> bool`
   - 私有 `_auto_save_loop()`、`_start_auto_save()`，使用 `threading.Event` 与守护线程。
 
-- [ ] **Step 1: 追加定时器测试与辅助函数**
+- [x] **Step 1: 追加定时器测试与辅助函数**
 
 在测试文件顶部加入 `import time`，并添加：
 
@@ -394,13 +394,13 @@ def test_non_positive_interval_rejected(tmp_path):
         )
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `python -m pytest cachedb/test_cachedb.py -k "auto_save or interval" -v`
 
 Expected: FAIL，`AttributeError: 'CacheDB' object has no attribute 'stop_auto_save'` 或文件未生成。
 
-- [ ] **Step 3: 实现定时线程**
+- [x] **Step 3: 实现定时线程**
 
 在 `__init__` 中新增 `self._stop_event = threading.Event()` 与 `self._thread: threading.Thread | None = None`，并在 `self.load()` 之后调用 `self._start_auto_save()`。
 
@@ -435,13 +435,13 @@ def stop_auto_save(self) -> bool:
 
 顶部加入 `import logging`。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v`
 
 Expected: 50 passed。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add cachedb/cacheDB.py cachedb/test_cachedb.py
@@ -459,7 +459,7 @@ git commit -m "feat: 实现定时自动保存与停止"
 **Interfaces:**
 - Consumes: Task A–D 的全部接口。
 
-- [ ] **Step 1: 追加集成测试**
+- [x] **Step 1: 追加集成测试**
 
 ```python
 def test_data_survives_restart(tmp_path):
@@ -494,19 +494,19 @@ def test_concurrent_writes_during_auto_save(tmp_path):
         db.stop_auto_save()
 ```
 
-- [ ] **Step 2: 运行测试**
+- [x] **Step 2: 运行测试**
 
 Run: `python -m pytest cachedb/test_cachedb.py -k "restart or default_file or concurrent" -v`
 
 Expected: PASS。若失败，记录失败输出，不改测试来迁就实现。
 
-- [ ] **Step 3: 运行全量测试**
+- [x] **Step 3: 运行全量测试**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v`
 
 Expected: 53 passed。
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 git add cachedb/test_cachedb.py
@@ -520,19 +520,19 @@ git commit -m "test: 增加持久化集成与并发测试"
 **Files:**
 - Modify: `cachedb/plans/2026-11-09-persistence-plan.md`（勾选复选框）
 
-- [ ] **Step 1: 运行全量测试并记录输出**
+- [x] **Step 1: 运行全量测试并记录输出**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v`
 
 Expected: 53 passed，0 failed。
 
-- [ ] **Step 2: 确认 Task 1 测试数量未减少**
+- [x] **Step 2: 确认 Task 1 测试数量未减少**
 
 Run: `python -m pytest cachedb/test_cachedb.py -v --collect-only`
 
 Expected: 收集到 53 个测试，其中原六个接口用例的断言未被修改。
 
-- [ ] **Step 3: 勾选本计划全部复选框并提交**
+- [x] **Step 3: 勾选本计划全部复选框并提交**
 
 ```bash
 git add cachedb/plans/2026-11-09-persistence-plan.md
