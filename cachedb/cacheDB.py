@@ -29,3 +29,7 @@ class CacheDB:
 
     def keys(self) -> list[str]:
         return list(self._data.keys())
+
+    def clear(self) -> bool:
+        self._data.clear()
+        return True

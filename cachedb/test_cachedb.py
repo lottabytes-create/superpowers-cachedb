@@ -131,3 +131,26 @@ def test_keys_order_unchanged_after_overwrite(db):
     db.set("b", "2")
     db.set("a", "3")
     assert db.keys() == ["a", "b"]
+
+
+def test_clear_returns_true(db):
+    assert db.clear() is True
+
+
+def test_clear_removes_all_data(db):
+    db.set("a", "1")
+    db.set("b", "2")
+    db.clear()
+    assert db.keys() == []
+    assert db.get("a") is None
+
+
+def test_clear_on_empty_cache_returns_true(db):
+    assert db.clear() is True
+
+
+def test_cache_usable_after_clear(db):
+    db.set("a", "1")
+    db.clear()
+    db.set("b", "2")
+    assert db.get("b") == "2"
