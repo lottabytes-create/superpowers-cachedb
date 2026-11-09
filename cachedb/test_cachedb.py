@@ -1,8 +1,25 @@
 import json
+import time
 
 import pytest
 
 from cacheDB import CacheDB
+
+
+def _read_json(path):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _wait_until(predicate, timeout=2.0):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        time.sleep(0.01)
+    return False
 
 
 def test_new_cache_instance(tmp_path):
@@ -275,3 +292,47 @@ def test_init_with_corrupt_file_raises_value_error(tmp_path):
     path.write_text("{bad", encoding="utf-8")
     with pytest.raises(ValueError):
         CacheDB(file_path=path, auto_save=False)
+
+
+def test_auto_save_writes_periodically(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=True, auto_save_interval=0.05)
+    try:
+        db.set("k", "v")
+        assert _wait_until(lambda: _read_json(path) == {"k": "v"})
+    finally:
+        db.stop_auto_save()
+
+
+def test_auto_save_disabled_does_not_write(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    db.set("k", "v")
+    time.sleep(0.15)
+    assert not path.exists()
+
+
+def test_stop_auto_save_stops_further_writes(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=True, auto_save_interval=0.05)
+    db.set("a", "1")
+    assert _wait_until(lambda: _read_json(path) == {"a": "1"})
+    assert db.stop_auto_save() is True
+    db.set("b", "2")
+    time.sleep(0.2)
+    assert _read_json(path) == {"a": "1"}
+
+
+def test_stop_auto_save_returns_false_when_not_running(tmp_path):
+    db = CacheDB(file_path=tmp_path / "cachedb_data.json", auto_save=False)
+    assert db.stop_auto_save() is False
+    assert db.stop_auto_save() is False
+
+
+def test_non_positive_interval_rejected(tmp_path):
+    with pytest.raises(ValueError):
+        CacheDB(
+            file_path=tmp_path / "cachedb_data.json",
+            auto_save=False,
+            auto_save_interval=0,
+        )

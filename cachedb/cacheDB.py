@@ -1,4 +1,5 @@
 import json
+import logging
 import threading
 from pathlib import Path
 
@@ -17,7 +18,10 @@ class CacheDB:
         self._auto_save_interval = auto_save_interval
         self._data: dict[str, str] = {}
         self._lock = threading.RLock()
+        self._stop_event = threading.Event()
+        self._thread: threading.Thread | None = None
         self.load()
+        self._start_auto_save()
 
     def _require_str(self, value: object, name: str) -> None:
         if not isinstance(value, str):
@@ -79,4 +83,29 @@ class CacheDB:
                 raise ValueError("all values must be strings")
         with self._lock:
             self._data = dict(data)
+        return True
+
+    def _auto_save_loop(self) -> None:
+        while not self._stop_event.wait(self._auto_save_interval):
+            try:
+                self.save()
+            except OSError as exc:
+                logging.getLogger(__name__).warning("auto save failed: %s", exc)
+
+    def _start_auto_save(self) -> None:
+        if not self._auto_save_enabled:
+            return
+        self._thread = threading.Thread(
+            target=self._auto_save_loop,
+            name="cachedb-autosave",
+            daemon=True,
+        )
+        self._thread.start()
+
+    def stop_auto_save(self) -> bool:
+        thread = self._thread
+        if thread is None or not thread.is_alive():
+            return False
+        self._stop_event.set()
+        thread.join()
         return True
