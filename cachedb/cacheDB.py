@@ -17,6 +17,7 @@ class CacheDB:
         self._auto_save_interval = auto_save_interval
         self._data: dict[str, str] = {}
         self._lock = threading.RLock()
+        self.load()
 
     def _require_str(self, value: object, name: str) -> None:
         if not isinstance(value, str):

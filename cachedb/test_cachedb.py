@@ -235,23 +235,43 @@ def test_load_empty_object_clears_data(tmp_path):
 
 def test_load_invalid_json_raises_value_error(tmp_path):
     path = tmp_path / "cachedb_data.json"
-    path.write_text("{not json", encoding="utf-8")
     db = CacheDB(file_path=path, auto_save=False)
+    path.write_text("{not json", encoding="utf-8")
     with pytest.raises(ValueError):
         db.load()
 
 
 def test_load_non_object_raises_value_error(tmp_path):
     path = tmp_path / "cachedb_data.json"
-    path.write_text('["a", "b"]', encoding="utf-8")
     db = CacheDB(file_path=path, auto_save=False)
+    path.write_text('["a", "b"]', encoding="utf-8")
     with pytest.raises(ValueError):
         db.load()
 
 
 def test_load_non_string_value_raises_value_error(tmp_path):
     path = tmp_path / "cachedb_data.json"
-    path.write_text('{"k": 1}', encoding="utf-8")
     db = CacheDB(file_path=path, auto_save=False)
+    path.write_text('{"k": 1}', encoding="utf-8")
     with pytest.raises(ValueError):
         db.load()
+
+
+def test_init_auto_loads_existing_file(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    path.write_text('{"name": "alice"}', encoding="utf-8")
+    db = CacheDB(file_path=path, auto_save=False)
+    assert db.get("name") == "alice"
+
+
+def test_init_without_file_starts_empty(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    db = CacheDB(file_path=path, auto_save=False)
+    assert db.keys() == []
+
+
+def test_init_with_corrupt_file_raises_value_error(tmp_path):
+    path = tmp_path / "cachedb_data.json"
+    path.write_text("{bad", encoding="utf-8")
+    with pytest.raises(ValueError):
+        CacheDB(file_path=path, auto_save=False)
