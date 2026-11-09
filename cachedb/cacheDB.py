@@ -11,3 +11,7 @@ class CacheDB:
         self._require_str(value, "value")
         self._data[key] = value
         return True
+
+    def get(self, key: str) -> str | None:
+        self._require_str(key, "key")
+        return self._data.get(key)

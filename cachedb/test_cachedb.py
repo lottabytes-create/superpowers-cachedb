@@ -28,3 +28,28 @@ def test_set_accepts_empty_string_key_and_value(db):
 def test_set_rejects_non_string(db, key, value):
     with pytest.raises(TypeError):
         db.set(key, value)
+
+
+def test_get_existing_value(db):
+    db.set("name", "alice")
+    assert db.get("name") == "alice"
+
+
+def test_get_missing_returns_none(db):
+    assert db.get("missing") is None
+
+
+def test_get_empty_string_value(db):
+    db.set("empty", "")
+    assert db.get("empty") == ""
+
+
+def test_get_after_overwrite_returns_latest(db):
+    db.set("k", "v1")
+    db.set("k", "v2")
+    assert db.get("k") == "v2"
+
+
+def test_get_rejects_non_string_key(db):
+    with pytest.raises(TypeError):
+        db.get(1)
