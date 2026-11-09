@@ -73,3 +73,29 @@ def test_delete_removes_value(db):
 def test_delete_rejects_non_string_key(db):
     with pytest.raises(TypeError):
         db.delete(1)
+
+
+def test_exists_true_after_set(db):
+    db.set("k", "v")
+    assert db.exists("k") is True
+
+
+def test_exists_false_for_missing(db):
+    assert db.exists("missing") is False
+
+
+def test_exists_false_after_delete(db):
+    db.set("k", "v")
+    db.delete("k")
+    assert db.exists("k") is False
+
+
+def test_exists_distinguishes_empty_value_from_missing(db):
+    db.set("empty", "")
+    assert db.exists("empty") is True
+    assert db.exists("missing") is False
+
+
+def test_exists_rejects_non_string_key(db):
+    with pytest.raises(TypeError):
+        db.exists(1)

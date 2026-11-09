@@ -22,3 +22,7 @@ class CacheDB:
             del self._data[key]
             return True
         return False
+
+    def exists(self, key: str) -> bool:
+        self._require_str(key, "key")
+        return key in self._data
