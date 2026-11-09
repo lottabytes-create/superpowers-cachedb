@@ -26,3 +26,6 @@ class CacheDB:
     def exists(self, key: str) -> bool:
         self._require_str(key, "key")
         return key in self._data
+
+    def keys(self) -> list[str]:
+        return list(self._data.keys())

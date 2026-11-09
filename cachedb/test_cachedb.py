@@ -99,3 +99,35 @@ def test_exists_distinguishes_empty_value_from_missing(db):
 def test_exists_rejects_non_string_key(db):
     with pytest.raises(TypeError):
         db.exists(1)
+
+
+def test_keys_empty_on_new_cache(db):
+    assert db.keys() == []
+
+
+def test_keys_returns_insertion_order(db):
+    db.set("b", "2")
+    db.set("a", "1")
+    db.set("c", "3")
+    assert db.keys() == ["b", "a", "c"]
+
+
+def test_keys_returns_copy(db):
+    db.set("a", "1")
+    result = db.keys()
+    result.append("injected")
+    assert db.keys() == ["a"]
+
+
+def test_keys_after_delete(db):
+    db.set("a", "1")
+    db.set("b", "2")
+    db.delete("a")
+    assert db.keys() == ["b"]
+
+
+def test_keys_order_unchanged_after_overwrite(db):
+    db.set("a", "1")
+    db.set("b", "2")
+    db.set("a", "3")
+    assert db.keys() == ["a", "b"]
